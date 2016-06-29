@@ -1,0 +1,24 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Canvas thumb</title>
+</head>
+<body ng-app="app">
+    <h1>Canvas thumb</h1>
+    <div id="content" ng-controller="appController as c">
+        <input type="file" ui-event="{ change : 'handleImageSelect($event)' }"/>
+        <div>
+            <h2>Thumb</h2>
+            <img ng-src="{{image.thumb}}" />
+        </div>
+        <div>
+            <h2>Original</h2>
+            <img ng-src="{{image.original}}" />
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+    <script src="event.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
