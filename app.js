@@ -52,7 +52,7 @@
             if (img.width / 2 > mW || img.height / 2 > mH) {
                 let ts = img.width > img.height ? mW / img.width: mH / img.height;
                 rs = smooth(ts);
-                img = scale(img);
+                //img = scale(img);  // Last simple sample, used for 400px adjust | ~ with text... :(
             } else {
                 img = scale(img);
             }
@@ -74,7 +74,7 @@
                 let tctx = temp.getContext("2d");
                 let w = image.width;
                 let h = image.height;
-                let r = mW / w;
+                let r = mW / w; // ratio factor
                 temp.width = mW; // Set new width 
                 temp.height = h * r;  // Scale height based on ratio
                 h = h * r;    // Reset height to match scaled image
@@ -99,6 +99,9 @@
                 cs *= sf;
                 img = stepDown(img);                
             }
+            // Discomment this for one last run at power of 2 (thumbs 201<>399px) | Leave comments for 401 <> 799px thumbs
+            //cs *= sf;
+            //img = stepDown(img);
             return ts / cs;
         }
 
