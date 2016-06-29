@@ -41,46 +41,79 @@
         // General options
         let mW = 400; // Max width for the image
         let mH = 600;    // Max height for the image
-        let q = .9; // Quality of the thumb 0 > 1
-
+        let q = 1; // Quality of the thumb 0 > 1
+        let sf = .5 // Scale factor
+        let cs = 1 // current scale
+        let rs = undefined // remaining Scale
+        let ofX = 0, ofY = 0; // Offset on Draw
+ 
         let ctx = canvas.getContext("2d");
-
         let onLoad = () => {
-            let w = img.width;    // Current image width
-            let h = img.height;  // Current image height
-            let r = mW / w;  // Used for aspect ratio | get ratio for scaling image
+            if (img.width / 2 > mW || img.height / 2 > mH) {
+                let ts = img.width > img.height ? mW / img.width: mH / img.height;
+                rs = smooth(ts);
+                img = scale(img);
+            } else {
+                img = scale(img);
+            }
 
+            //ctx.scale(rs, rs); // Scale before set new canvas sizes!!
+            canvas.width = img.width;
+            canvas.height = img.height;
 
-            // Only if the current image needs resize
-            if (img.width > mW || img.height > mH) {
-                img.width = mW; // Set new width 
-                img.height = h * r;  // Scale height based on ratio
+            if (result.startsWith("data:image/jpeg")) {
+                draw();
+            } else {
+                applyPattern();
+            }            
+        }
+
+        let scale = (image) => {
+            if (image.width > mW || image.height > mH) {
+                let temp = angular.element("<canvas></canvas>")[0];
+                let tctx = temp.getContext("2d");
+                let w = image.width;
+                let h = image.height;
+                let r = mW / w;
+                temp.width = mW; // Set new width 
+                temp.height = h * r;  // Scale height based on ratio
                 h = h * r;    // Reset height to match scaled image
                 w = w * r;    // Reset width to match scaled image
                 // Only if the current height is still bigger than maxHeight
                 if (h > mH) {
                     r = mH / h; // get ratio for scaling image
-                    img.height = mH;   // Set new height
-                    img.width = w * r;    // Scale width based on ratio
-                    w = w * r;    // Reset width to match scaled image
-                    h = w * r;    // Reset height to match scaled image
+                    temp.height = mH;   // Set new height
+                    temp.width = w * r;    // Scale width based on ratio
                 }
-            }// else {
-            // deferred.resolve(new Error("No thumbs needed"));
-            //}
-            canvas.width = img.width; // Set final thumb width on canvas
-            canvas.height = img.height; // Set final thumb height on canvas
-
-            //if can have alpha channel
-            if (result.startsWith("data:image/jpeg")) {
-                draw(); // No alpha
-            } else {
-                applyPattern(); // Alpha
+                tctx.scale(r, r);
+                tctx.drawImage(image, 0, 0);
+                return temp;
             }
+            return image;
+        }
+
+        let smooth = ts => {
+            ofX = 2;
+            ofY = 2;
+            while (cs * sf > ts) {
+                cs *= sf;
+                img = stepDown(img);                
+            }
+            return ts / cs;
+        }
+
+        let stepDown = (image) => {
+            let temp = angular.element("<canvas></canvas>")[0];
+            let tctx = temp.getContext("2d");
+            temp.width = image.width * sf + 1;
+            temp.height = image.height * sf + 1;
+            tctx.scale(sf, sf);
+            tctx.drawImage(image, 0, 0);
+            return temp;
         }
 
         let draw = () => {
-            ctx.drawImage(img, 0, 0, img.width, img.height); // Draw thumb on canvas
+            ctx.drawImage(img, 0, 0); // Draw thumb on canvas            
             // Test in explorer, base64 data uri image
             let thumb = canvas.toDataURL("image/jpg", q);
             deferred.resolve(thumb);
@@ -93,7 +126,7 @@
             pattern.src = "./pattern.jpg"  // scr of pattern image
             pattern.onload = () => {
                 ctx.fillStyle = ctx.createPattern(pattern, "repeat");
-                ctx.fillRect(0, 0, img.width, img.height); // Drawing background ↑                
+                ctx.fillRect(0, 0, img.width - ofX, img.height - ofY); // Drawing background ↑
                 draw();
             }
         }
