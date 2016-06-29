@@ -115,10 +115,10 @@
         let draw = () => {
             ctx.drawImage(img, 0, 0); // Draw thumb on canvas            
             // Test in explorer, base64 data uri image
-            let thumb = canvas.toDataURL("image/jpg", q);
+            let thumb = canvas.toDataURL("image/png", q);
             deferred.resolve(thumb);
             // Blob
-            //canvas.toBlob(blob=> { deferred.resolve(blob); }, "image/jpg", q);
+            //canvas.toBlob(blob=> { deferred.resolve(blob); }, "image/png", q);
         }
 
         let applyPattern = () => {
